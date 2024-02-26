@@ -23,17 +23,57 @@ const {
   mergeMap,
   mergeAll,
   delay,
+  bufferCount,
 } = require("rxjs/operators");
 
-const { of } = require("rxjs");
+const { of, interval, from } = require("rxjs");
 
 function openBox(delivery) {
-  of(delivery).pipe(
+  return of(delivery).pipe(
     delay(3000),
-    tpa((delivery) => console.log(delivery + " 를 열었습니다."))
+    tap((delivery) => console.log(delivery + " 를 열었습니다."))
   );
 }
 
-function checkProduct() {}
+function checkProduct(delivery) {
+  return of(delivery).pipe(
+    delay(3000),
+    tap((delivery) => console.log(delivery + " 를 검사했습니다."))
+  );
+}
 
-function useProduct() {}
+function useProduct(delivery) {
+  return of(delivery).pipe(
+    delay(3000),
+    tap((delivery) => console.log(delivery + " 를 사용했습니다."))
+  );
+}
+
+function doTask(delivery) {
+  const tasks = from([
+    openBox(delivery),
+    checkProduct(delivery),
+    useProduct(delivery),
+  ]);
+  return tasks.pipe(
+    concatAll(),
+    reduce((acc, data) => {
+      return delivery;
+    })
+  );
+}
+
+const deliveries = interval(1000).pipe(take(1000));
+
+function sendToAirport(tenDeliveries) {
+  console.log("공항발송", tenDeliveries);
+}
+
+deliveries
+  .pipe(
+    map((delivery) => doTask(delivery)),
+    mergeAll(3),
+    bufferCount(10),
+    tap((tenDeliveries) => sendToAirport(tenDeliveries))
+  )
+  .subscribe();

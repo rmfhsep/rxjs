@@ -9,35 +9,44 @@
 // 주식 거래를 성공한 뒤에는 10개씩 나누어 결과를 저장하되, 주식 거래 행위에 영향을 주지 않도록 비동기로 저장한다.
 
 const { default: Axios } = require("axios");
+const { from, range, interval } = require("rxjs");
 const {
-  from,
-  range,
+  mergeAll,
+  delay,
   retry,
-  interval,
+  mergeMap,
   bufferCount,
   reduce,
-  mergeMap,
-} = require("rxjs");
+  map,
+  tap,
+} = require("rxjs/operators");
 
 function startTrade$(tradeNumber) {
   return range(0, 1000).pipe(
+    tap(console.log(tradeNumber)),
     map(() => apiCall$().pipe(delay(5))),
+
     mergeAll(10),
     retry(2),
-    reduce((acc, data) => {
+
+    reduce((accu, data) => {
       return tradeNumber;
     })
   );
 }
 
 function apiCall$() {
-  return from(Axios.get("https://naver.com"));
+  return from(Axios.get("http://127.0.0.1:3000/people/name/random"));
 }
 
-function saveResult$() {}
+function saveResult$(results) {
+  console.log(results);
+}
 
-interval(10 * 1000).pipe(
-  mergeMap((tradeNumber) => startTrade$(tradeNumber)),
-  bufferCount(10),
-  mergeMap((results) => saveResult$(results))
-);
+interval(10 * 1000)
+  .pipe(
+    mergeMap((tradeNumber) => startTrade$(tradeNumber)),
+    bufferCount(10), // [0,1,2,3,....]
+    mergeMap((results) => saveResult$(results))
+  )
+  .subscribe();
