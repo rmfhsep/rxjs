@@ -103,6 +103,9 @@ const {
 //   )
 //   .subscribe(console.log);
 
+// -----------------------
+// 택배
+
 const stream = Rx.interval(1000).pipe(
   take(3),
   map((data) => `택배${data + 1} `)
@@ -142,17 +145,6 @@ async function userTask(data) {
   await useProduct(data);
 }
 
-//concatMap
-// stream.pipe(concatMap((data) => Rx.from(userTask(data)))).subscribe();
-
-// concatAll
-// const stream1 = Rx.interval(1000).pipe(take(3));
-// const stream2 = Rx.interval(1000).pipe(take(3));
-
-// const stream3 = Rx.of(stream1, stream2);
-
-// stream3.pipe(concatAll()).subscribe(console.log);
-
 //mergeAll
 const stream1 = Rx.interval(1000).pipe(take(3), tap(console.log));
 const stream2 = Rx.interval(1000).pipe(take(3), tap(console.log));
@@ -165,5 +157,4 @@ const stream5 = Rx.of(stream1, stream2, stream3, stream4);
 stream5.pipe(mergeAll(2)).subscribe();
 
 //mergeMap
-
 // stream.pipe(mergeMap((data) => Rx.from(userTask(data)))).subscribe();

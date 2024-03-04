@@ -15,12 +15,9 @@ const Rx = require("rxjs");
 const {
   take,
   tap,
-  filter,
   map,
   reduce,
-  concatMap,
   concatAll,
-  mergeMap,
   mergeAll,
   delay,
   bufferCount,
@@ -42,10 +39,10 @@ function checkProduct(delivery) {
   );
 }
 
-function useProduct(delivery) {
+function packProduct(delivery) {
   return of(delivery).pipe(
     delay(3000),
-    tap((delivery) => console.log(delivery + " 를 사용했습니다."))
+    tap((delivery) => console.log(delivery + " 를 포장했습니다."))
   );
 }
 
@@ -53,7 +50,7 @@ function doTask(delivery) {
   const tasks = from([
     openBox(delivery),
     checkProduct(delivery),
-    useProduct(delivery),
+    packProduct(delivery),
   ]);
   return tasks.pipe(
     concatAll(),
